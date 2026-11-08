@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '*.zip'
+      - 'redesign.cjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
@@ -21,11 +22,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
-      - name: Extraer web
+      - name: Extraer web y aplicar diseño
         run: |
           mkdir -p _site
           unzip -q enlascenizas-github-pages-2026-11-08.zip -d _site
           test -f _site/index.html
+          node --check redesign.cjs
+          node redesign.cjs _site
+          node --check _site/site.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
