@@ -27,6 +27,18 @@
 @media(max-width:480px){.gallery{grid-template-columns:1fr}.gallery .wide{grid-column:auto}.hero h1{letter-spacing:-.06em}.hero .eyebrow{font-size:9px;letter-spacing:.17em}.hero-description{font-size:15px}.wrap{width:88%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}#abyss-mist{display:none}}
 
+/* Elementalist framing, compact illustrated chapters and the complete archive. */
+.hero{padding-inline:6%}.hero-image{width:88%;object-position:40% 65%;filter:none;transform:scale(1.15);transform-origin:45% 65%}.hero-shade{background:linear-gradient(90deg,#120f1810 0%,#120f1810 30%,#120f1833 44%,#120f18cc 64%,#120f18 88%),linear-gradient(0deg,var(--ink),transparent 23%,transparent 85%,#120f1860)}.hero-copy{margin-left:auto;width:44%;max-width:620px}.hero h1{font-size:clamp(78px,8.8vw,140px)}
+.feature-layout{display:grid;grid-template-columns:1.08fr 1fr;gap:5%;align-items:center}.feature-layout .editorial{display:block;padding-top:0}.feature-layout .editorial h3{font-size:clamp(27px,2.6vw,38px);margin-bottom:22px}.feature-layout .landscape figcaption span+span{display:none}.feature-layout .copy{font-size:15px}.chapter{padding-block:64px}.section-heading{margin-bottom:30px}.section-heading h2{font-size:clamp(36px,4.3vw,58px)}
+.gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:25px 20px}.gallery figure{margin:0}.gallery a{aspect-ratio:3/2}.gallery img{height:100%;object-fit:cover}.gallery figcaption{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font:12px/1.6 var(--display)}.gallery-index{font:10px/1.6 Arial,sans-serif;color:#998ba6;white-space:nowrap}.gallery-art{grid-column:1/-1;max-width:800px;width:100%;margin:20px auto 0!important}.gallery-art a{aspect-ratio:2048/1425}.lightbox img{max-height:calc(100dvh - 205px)}.lightbox-controls{display:flex;align-items:center;gap:22px;color:var(--muted);font-size:12px}.lightbox-controls button{width:44px;height:40px;border:1px solid var(--line);background:#21172d;color:var(--paper);font:22px Georgia}.lightbox-controls button:disabled{opacity:.25;cursor:default}.photo-counter{min-width:65px;text-align:center;font-variant-numeric:tabular-nums}
+@media(min-width:1600px){.hero-copy{margin-left:auto}}
+@media(max-width:1000px) and (min-width:801px){.hero-copy{width:47%}.hero h1{font-size:86px}.hero .eyebrow{font-size:9px;letter-spacing:.15em}.feature-layout{gap:4%}.feature-layout .copy{font-size:14px}}
+@media(max-width:800px){.hero{display:block;min-height:850px;min-height:100svh;padding:clamp(390px,50svh,550px) 6% 110px}.hero-image{width:100%;height:70%;object-position:47% 60%;transform:scale(1.08);transform-origin:50% 40%}.hero-copy{width:100%;max-width:520px;margin:0}.hero h1{font-size:clamp(80px,17vw,126px)}.hero .eyebrow{margin-bottom:19px}.hero-shade{background:linear-gradient(0deg,var(--ink) 0%,#120f18fa 28%,#120f1880 48%,#120f180a 65%,#120f1820 88%,#120f1870 100%)}.hero .rule{margin:20px 0 16px}.hero .enter{margin-top:20px}.hero-description{max-width:400px}.feature-layout{grid-template-columns:1fr;gap:26px}.feature-layout .editorial h3{margin-bottom:16px}.chapter{padding-block:45px}.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 14px}.gallery figcaption{font-size:11px}.gallery-index{font-size:9px}.gallery-art{margin-top:6px!important}.hero-bottom{font-size:9px}.section-heading{margin-bottom:26px}}
+@media(max-width:480px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 10px}.gallery figcaption>span:first-child{max-width:100px}.gallery-index{display:none}.gallery .expand{width:27px;height:27px;font-size:18px;right:6px;bottom:6px}.lightbox{padding-inline:12px}.lightbox p{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.mist-toggle{display:none!important}}
+.hero-shade::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 90% 5%,#120f18 0%,#120f18e8 36%,#120f1880 61%,transparent 85%)}
+@media(max-width:800px){.hero-image{object-position:35% 65%}.hero-shade::before{height:72%;background:radial-gradient(ellipse 90% 65% at 110% 0%,#120f18 5%,#120f18e6 42%,#120f1833 72%,transparent 95%)}.hero-bottom{right:105px}.hero-description br::after{content:' '}}
+
 /* Compact photos with their accompanying text alongside. */
 .feature-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:5%;align-items:center}
 .feature-layout .editorial{display:block;padding-top:0}
@@ -35,3 +47,5 @@
 .feature-layout .landscape figcaption span+span{display:none}
 #el-juego,#el-mundo{padding-block:54px}
 @media(max-width:800px){.feature-layout{grid-template-columns:1fr;gap:24px}.feature-layout .landscape{width:100%;max-width:720px;margin-inline:auto}.feature-layout .editorial h3{margin-bottom:16px}#el-juego,#el-mundo{padding-block:40px}}
+
+@media(min-width:801px){.hero-bottom{right:160px}}
