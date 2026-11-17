@@ -59,3 +59,13 @@
 .story-row .copy{font-size:16px;line-height:1.95}
 .story-row .copy strong{color:var(--paper)}
 @media(max-width:800px){.story-row+.story-row{margin-top:32px;padding-top:32px}.story-row .copy{font-size:15px}.story-photos{gap:10px}}
+
+/* Storm-city cover: keep the traveller and reflection clear of the title. */
+.hero{min-height:760px;min-height:100svh;padding:150px 6% 125px}
+.hero-image{width:100%;height:100%;object-position:65% 60%;transform:none;filter:none}
+.hero-copy{width:44%;max-width:620px;margin-left:0}
+.hero-shade{background:linear-gradient(90deg,#100f18c9 0%,#100f1880 30%,#100f181f 58%,transparent 78%),linear-gradient(0deg,var(--ink),transparent 17%,transparent 82%,#100f1859)}
+.hero-shade::before{display:none}
+@media(min-width:1600px){.hero-copy{margin-left:0}}
+@media(max-width:1000px) and (min-width:801px){.hero-copy{width:48%}}
+@media(max-width:800px){.hero{display:block;min-height:850px;min-height:100svh;padding:clamp(420px,55svh,600px) 6% 110px}.hero-image{width:100%;height:72%;object-position:70% 62%;transform:none}.hero-copy{width:100%;max-width:520px;margin:0}.hero-shade{background:linear-gradient(0deg,var(--ink) 0%,#120f18fa 25%,#120f1880 44%,#120f180a 66%,#120f1810 85%,#120f1870 100%)}}
