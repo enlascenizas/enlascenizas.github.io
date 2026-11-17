@@ -11,3 +11,7 @@ for(const [name,data] of Object.entries(files)){
 }
 fs.writeFileSync(path.join(root,'.nojekyll'),'');
 console.log('Eldritch-inspired design applied: '+Object.keys(files).length+' files.');
+
+// En el Abismo lives alongside the existing site.
+const abyssSource = path.join(__dirname, 'en-el-abismo');
+if (fs.existsSync(abyssSource)) fs.cpSync(abyssSource, path.join(root, 'en-el-abismo'), {recursive:true});

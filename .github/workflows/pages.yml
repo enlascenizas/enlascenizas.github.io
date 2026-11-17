@@ -5,6 +5,7 @@ on:
     paths:
       - '*.zip'
       - 'redesign.cjs'
+      - 'en-el-abismo/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
@@ -30,6 +31,7 @@ jobs:
           node --check redesign.cjs
           node redesign.cjs _site
           node --check _site/site.js
+          node --check _site/en-el-abismo/abismo.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
