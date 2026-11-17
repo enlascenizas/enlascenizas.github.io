@@ -49,3 +49,13 @@
 @media(max-width:800px){.feature-layout{grid-template-columns:1fr;gap:24px}.feature-layout .landscape{width:100%;max-width:720px;margin-inline:auto}.feature-layout .editorial h3{margin-bottom:16px}#el-juego,#el-mundo{padding-block:40px}}
 
 @media(min-width:801px){.hero-bottom{right:160px}}
+
+/* The author's full text and accompanying photographs. */
+.story-row+.story-row{margin-top:48px;padding-top:48px;border-top:1px solid var(--line)}
+.story-photos{display:grid;gap:16px;min-width:0}
+.story-photos:has(figure+figure){grid-template-columns:repeat(2,minmax(0,1fr))}
+.story-photos figure{margin:0;min-width:0}
+.story-photos img{width:100%;height:auto;display:block}
+.story-row .copy{font-size:16px;line-height:1.95}
+.story-row .copy strong{color:var(--paper)}
+@media(max-width:800px){.story-row+.story-row{margin-top:32px;padding-top:32px}.story-row .copy{font-size:15px}.story-photos{gap:10px}}

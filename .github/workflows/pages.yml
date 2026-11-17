@@ -30,6 +30,7 @@ jobs:
           test -f _site/index.html
           node --check redesign.cjs
           node redesign.cjs _site
+          python3 .github/scripts/cache-itch-images.py
           node --check _site/site.js
           node --check _site/en-el-abismo/abismo.js
       - uses: actions/configure-pages@v5
@@ -39,3 +40,4 @@ jobs:
       - name: Publicar
         id: deployment
         uses: actions/deploy-pages@v4
+

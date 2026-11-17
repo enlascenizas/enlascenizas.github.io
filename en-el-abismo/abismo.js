@@ -66,38 +66,51 @@
     return (a + (b - a) * sx) * (1 - sy) + (c + (d - c) * sx) * sy;
   }
   function makeSprite(rgb, seed) {
-    const texture = document.createElement('canvas'); texture.width = 256; texture.height = 160;
-    const c = texture.getContext('2d'); const pixels = c.createImageData(256, 160);
-    for (let y = 0; y < 160; y++) for (let x = 0; x < 256; x++) {
-      const nx = (x - 128) / 128, ny = (y - 80) / 80;
-      const warp = noise(x / 65, y / 55, seed + 8);
-      let v = 0, amp = .55, scale = 75;
-      for (let k = 0; k < 4; k++) { v += noise((x + warp * 35) / scale, y / scale, seed + k) * amp; amp *= .5; scale *= .48; }
-      const mask = Math.pow(Math.max(0, 1 - nx * nx - ny * ny), 1.8);
-      const alpha = Math.min(1, Math.max(0, v - .17) * 1.6) * mask;
-      const p = (y * 256 + x) * 4;
-      pixels.data[p] = rgb[0]; pixels.data[p + 1] = rgb[1]; pixels.data[p + 2] = rgb[2]; pixels.data[p + 3] = Math.round(alpha * 210);
+    const texture = document.createElement('canvas');
+    const tw = 640, th = 400;
+    texture.width = tw; texture.height = th;
+    const c = texture.getContext('2d'), pixels = c.createImageData(tw, th);
+    for (let y = 0; y < th; y++) for (let x = 0; x < tw; x++) {
+      const nx = (x - tw / 2) / (tw / 2), ny = (y - th / 2) / (th / 2);
+      const radius = Math.hypot(nx, ny), angle = Math.atan2(ny, nx);
+      // Twist the noise coordinates into ragged curls, with clear fine ridges.
+      const twist = angle + 3.8 * Math.exp(-radius * 1.65);
+      const u = Math.cos(twist) * radius * 250 + 340;
+      const v = Math.sin(twist) * radius * 250 + 230;
+      const warp = noise(u / 70, v / 70, seed + 8);
+      let value = 0, amp = .56, scale = 110;
+      for (let k = 0; k < 5; k++) {
+        value += noise((u + warp * 65) / scale, v / scale, seed + k) * amp;
+        amp *= .48; scale *= .46;
+      }
+      const ridge = Math.pow(Math.max(0, 1 - Math.abs(value - .48) * 8), 2.4);
+      const mask = Math.pow(Math.max(0, 1 - radius * radius), 1.45);
+      const alpha = (.10 * value + .84 * ridge) * mask;
+      const i = (y * tw + x) * 4;
+      pixels.data[i] = rgb[0]; pixels.data[i + 1] = rgb[1];
+      pixels.data[i + 2] = rgb[2]; pixels.data[i + 3] = Math.round(alpha * 235);
     }
     c.putImageData(pixels, 0, 0); return texture;
   }
   function resize() {
     width = innerWidth; height = innerHeight;
-    const ratio = Math.min(devicePixelRatio || 1, small.matches ? 1 : 1.25);
+    const ratio = Math.min(devicePixelRatio || 1, small.matches ? 1.5 : 2);
     canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    clouds = Array.from({ length: small.matches ? 13 : 21 }, (_, i) => ({
+    clouds = Array.from({ length: small.matches ? 16 : 26 }, (_, i) => ({
       x: (i * .618034) % 1, y: (i * .381966 + .15) % 1,
-      size: .65 + (i % 5) * .1, speed: (i % 2 ? 1 : -1) * (.004 + (i % 4) * .0014),
-      phase: i * 1.71, sprite: i % 4, alpha: .27 + (i % 3) * .06,
+      size: .55 + (i % 5) * .09, spin: (i % 2 ? 1 : -1) * (.12 + (i % 4) * .026),
+      phase: i * 1.71, sprite: i % 4, alpha: .36 + (i % 3) * .06,
       ox: 0, oy: 0, vx: 0, vy: 0
     }));
     paint();
   }
   function geometry(cloud) {
-    const w = Math.max(600, width * 1.1) * cloud.size * (1 + .055 * Math.sin(clock * .13 + cloud.phase));
-    const h = Math.max(230, height * .48) * cloud.size * (1 + .075 * Math.cos(clock * .11 + cloud.phase));
-    const x = cloud.x * width + Math.sin(clock * .075 + cloud.phase) * width * .12;
-    const y = cloud.y * height + Math.cos(clock * .085 + cloud.phase) * height * .12;
+    const orbit = clock * cloud.spin + cloud.phase;
+    const w = Math.max(400, width * .65) * cloud.size * (1 + .13 * Math.sin(clock * .65 + cloud.phase));
+    const h = Math.max(250, height * .48) * cloud.size * (1 + .16 * Math.cos(clock * .53 + cloud.phase));
+    const x = cloud.x * width + Math.cos(orbit) * width * .105 + Math.sin(clock * .47 + cloud.phase) * 26;
+    const y = cloud.y * height + Math.sin(orbit) * height * .12 + Math.cos(clock * .39 + cloud.phase) * 22;
     return { x, y, w, h };
   }
   function evolve(dt) {
@@ -130,8 +143,8 @@
       const { x, y, w, h } = geometry(cloud);
       ctx.save();
       ctx.translate(x + cloud.ox, y + cloud.oy);
-      ctx.rotate(Math.sin(clock * .06 + cloud.phase) * .12);
-      ctx.globalAlpha = cloud.alpha * (.85 + .15 * Math.sin(clock * .12 + cloud.phase));
+      ctx.rotate(clock * cloud.spin * 1.8 + Math.sin(clock * .44 + cloud.phase) * .28);
+      ctx.globalAlpha = cloud.alpha * (.82 + .18 * Math.sin(clock * .55 + cloud.phase));
       ctx.drawImage(sprites[cloud.sprite], -w / 2, -h / 2, w, h);
       ctx.restore();
     }
@@ -157,7 +170,7 @@
     if (paused || reduced.matches || document.hidden) return;
     if (!last) last = now;
     const dt = now - last;
-    if (dt >= 1000 / 24) { evolve(Math.min(dt, 100) / 1000); last = now; paint(); }
+    if (dt >= 1000 / 30) { evolve(Math.min(dt, 100) / 1000); last = now; paint(); }
     raf = requestAnimationFrame(frame);
   }
   function sync() {
