@@ -73,19 +73,18 @@
     for (let y = 0; y < th; y++) for (let x = 0; x < tw; x++) {
       const nx = (x - tw / 2) / (tw / 2), ny = (y - th / 2) / (th / 2);
       const radius = Math.hypot(nx, ny), angle = Math.atan2(ny, nx);
-      // Twist the noise coordinates into ragged curls, with clear fine ridges.
-      const twist = angle + 3.8 * Math.exp(-radius * 1.65);
+      // Broad, softly warped density fields give the mist a diffuse cloud body.
+      const twist = angle + 1.2 * Math.exp(-radius * 1.65);
       const u = Math.cos(twist) * radius * 250 + 340;
       const v = Math.sin(twist) * radius * 250 + 230;
       const warp = noise(u / 70, v / 70, seed + 8);
-      let value = 0, amp = .56, scale = 110;
-      for (let k = 0; k < 5; k++) {
+      let value = 0, amp = .56, scale = 145;
+      for (let k = 0; k < 4; k++) {
         value += noise((u + warp * 65) / scale, v / scale, seed + k) * amp;
-        amp *= .48; scale *= .46;
+        amp *= .46; scale *= .58;
       }
-      const ridge = Math.pow(Math.max(0, 1 - Math.abs(value - .48) * 8), 2.4);
       const mask = Math.pow(Math.max(0, 1 - radius * radius), 1.45);
-      const alpha = (.10 * value + .84 * ridge) * mask;
+      const alpha = Math.pow(value, 1.25) * .72 * mask;
       const i = (y * tw + x) * 4;
       pixels.data[i] = rgb[0]; pixels.data[i + 1] = rgb[1];
       pixels.data[i + 2] = rgb[2]; pixels.data[i + 3] = Math.round(alpha * 235);
@@ -97,10 +96,10 @@
     const ratio = Math.min(devicePixelRatio || 1, small.matches ? 1.5 : 2);
     canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    clouds = Array.from({ length: small.matches ? 16 : 26 }, (_, i) => ({
+    clouds = Array.from({ length: small.matches ? 12 : 18 }, (_, i) => ({
       x: (i * .618034) % 1, y: (i * .381966 + .15) % 1,
-      size: .55 + (i % 5) * .09, spin: (i % 2 ? 1 : -1) * (.12 + (i % 4) * .026),
-      phase: i * 1.71, sprite: i % 4, alpha: .36 + (i % 3) * .06,
+      size: .78 + (i % 5) * .09, spin: (i % 2 ? 1 : -1) * (.025 + (i % 4) * .006),
+      phase: i * 1.71, sprite: i % 4, alpha: .30 + (i % 3) * .04,
       ox: 0, oy: 0, vx: 0, vy: 0
     }));
     paint();
@@ -114,7 +113,7 @@
     return { x, y, w, h };
   }
   function evolve(dt) {
-    clock += dt;
+    clock += dt * .65;
     pointer.strength *= Math.exp(-dt * 2.4);
     pointer.vx *= Math.exp(-dt * 3); pointer.vy *= Math.exp(-dt * 3);
     for (const cloud of clouds) {
