@@ -77,7 +77,49 @@
 .gallery-heading h2{font-size:clamp(36px,4.3vw,58px);letter-spacing:-.03em}
 @media(max-width:800px){.gallery-section{margin-top:14px;padding-block:38px 48px}.gallery-heading{gap:20px;margin-bottom:26px}}
 
-/* Diffuse atmosphere stays behind every content block and photograph. */
-#abyss-mist{z-index:0;opacity:.38;filter:blur(8px) saturate(.75)}
-body>main{position:relative;z-index:1}
-@media(max-width:800px){#abyss-mist{opacity:.30;filter:blur(6px) saturate(.75)}}
+/* Let the chapter photography use the available width. */
+#el-mundo > .wrap,
+#el-juego.wrap {
+  width: min(1920px, calc(100% - clamp(28px, 5vw, 104px)));
+}
+.story-row {
+  grid-template-columns: minmax(0, 1fr) clamp(16.5rem, 20vw, 23rem);
+  gap: clamp(24px, 3vw, 56px);
+}
+.story-row .copy { color: #ddd0dc; }
+.story-row .copy em { color: #dfc9e9; }
+
+@media (max-width: 900px) {
+  .story-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .story-row .landscape { max-width: none; }
+  .story-row .editorial {
+    width: min(calc(100% - 12px), 66ch);
+    margin-inline: auto;
+  }
+}
+@media (max-width: 560px) {
+  .story-photos:has(figure + figure) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Defocused orange and violet light, behind the photos and copy. */
+body::before {
+  background:
+    radial-gradient(ellipse at 0% 48%, #8b402c45, transparent 62%),
+    radial-gradient(ellipse at 96% 68%, #6e389752, transparent 64%);
+}
+#abyss-mist {
+  z-index: 0;
+  opacity: .84;
+}
+body > main {
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 800px) {
+  #abyss-mist { opacity: .73; }
+}

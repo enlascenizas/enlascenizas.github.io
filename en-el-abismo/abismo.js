@@ -1,4 +1,4 @@
-/* En el Abismo — textured mist, no particle or ash effect. */
+/* En el Abismo — soft, drifting orange and violet mist. */
 (() => {
   'use strict';
   const menu = document.querySelector('.menu-button');
@@ -55,61 +55,57 @@
   let lastWake = 0;
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-  // Smooth value noise, layered at different frequencies. All texture is made
-  // once on small offscreen canvases; animation only composites cached sprites.
-  function noise(x, y, seed) {
-    const ix = Math.floor(x), iy = Math.floor(y);
-    const fx = x - ix, fy = y - iy;
-    const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
-    const hash = (a, b) => { const n = Math.sin(a * 127.1 + b * 311.7 + seed * 74.7) * 43758.5453; return n - Math.floor(n); };
-    const a = hash(ix, iy), b = hash(ix + 1, iy), c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1);
-    return (a + (b - a) * sx) * (1 - sy) + (c + (d - c) * sx) * sy;
-  }
-  function makeSprite(rgb, seed) {
+  // Bake the merged, soft-edged lobes once. Each frame moves the cached sprites.
+  function makeSprite(rgb, index) {
     const texture = document.createElement('canvas');
-    const tw = 640, th = 400;
-    texture.width = tw; texture.height = th;
-    const c = texture.getContext('2d'), pixels = c.createImageData(tw, th);
-    for (let y = 0; y < th; y++) for (let x = 0; x < tw; x++) {
-      const nx = (x - tw / 2) / (tw / 2), ny = (y - th / 2) / (th / 2);
-      const radius = Math.hypot(nx, ny), angle = Math.atan2(ny, nx);
-      // Broad, softly warped density fields give the mist a diffuse cloud body.
-      const twist = angle + 1.2 * Math.exp(-radius * 1.65);
-      const u = Math.cos(twist) * radius * 250 + 340;
-      const v = Math.sin(twist) * radius * 250 + 230;
-      const warp = noise(u / 70, v / 70, seed + 8);
-      let value = 0, amp = .56, scale = 145;
-      for (let k = 0; k < 4; k++) {
-        value += noise((u + warp * 65) / scale, v / scale, seed + k) * amp;
-        amp *= .46; scale *= .58;
+    texture.width = 256;
+    texture.height = 192;
+    const c = texture.getContext('2d');
+    const pixels = c.createImageData(texture.width, texture.height);
+    const skew = index % 2 ? 1 : -1;
+    for (let y = 0; y < texture.height; y++) {
+      const ny = 2 * (y + .5) / texture.height - 1;
+      for (let x = 0; x < texture.width; x++) {
+        const nx = 2 * (x + .5) / texture.width - 1;
+        const main = Math.exp(-((nx + .18) ** 2 * 5.8 + (ny - .07 * skew) ** 2 * 7.5));
+        const lobe = Math.exp(-((nx - .30) ** 2 * 9.2 + (ny + .24 * skew) ** 2 * 12));
+        const tip = Math.exp(-((nx - .04) ** 2 * 10 + (ny - .40 * skew) ** 2 * 13));
+        const edge = Math.max(0, 1 - nx * nx - ny * ny);
+        const density = 1 - Math.exp(-1.45 * (main + .83 * lobe + .47 * tip));
+        const i = (y * texture.width + x) * 4;
+        pixels.data[i] = rgb[0];
+        pixels.data[i + 1] = rgb[1];
+        pixels.data[i + 2] = rgb[2];
+        pixels.data[i + 3] = Math.round(226 * density * edge ** 1.5);
       }
-      const mask = Math.pow(Math.max(0, 1 - radius * radius), 1.45);
-      const alpha = Math.pow(value, 1.25) * .72 * mask;
-      const i = (y * tw + x) * 4;
-      pixels.data[i] = rgb[0]; pixels.data[i + 1] = rgb[1];
-      pixels.data[i + 2] = rgb[2]; pixels.data[i + 3] = Math.round(alpha * 235);
     }
-    c.putImageData(pixels, 0, 0); return texture;
+    c.putImageData(pixels, 0, 0);
+    return texture;
   }
   function resize() {
     width = innerWidth; height = innerHeight;
-    const ratio = Math.min(devicePixelRatio || 1, small.matches ? 1.5 : 2);
-    canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    clouds = Array.from({ length: small.matches ? 12 : 18 }, (_, i) => ({
-      x: (i * .618034) % 1, y: (i * .381966 + .15) % 1,
-      size: .78 + (i % 5) * .09, spin: (i % 2 ? 1 : -1) * (.025 + (i % 4) * .006),
-      phase: i * 1.71, sprite: i % 4, alpha: .30 + (i % 3) * .04,
+    canvas.width = width;
+    canvas.height = height;
+    const centers = [
+      [.13, .30], [.74, .28], [.41, .76], [.84, .85],
+      [.17, .88], [.88, .51], [.53, .08], [.38, .48]
+    ];
+    clouds = centers.map(([x, y], i) => ({
+      x, y,
+      size: .89 + (i % 3) * .11,
+      spin: (i % 2 ? 1 : -1) * (.105 + (i % 4) * .018),
+      phase: i * 1.71, sprite: i % 4, alpha: .68 + (i % 3) * .08,
       ox: 0, oy: 0, vx: 0, vy: 0
     }));
     paint();
   }
   function geometry(cloud) {
     const orbit = clock * cloud.spin + cloud.phase;
-    const w = Math.max(400, width * .65) * cloud.size * (1 + .13 * Math.sin(clock * .65 + cloud.phase));
-    const h = Math.max(250, height * .48) * cloud.size * (1 + .16 * Math.cos(clock * .53 + cloud.phase));
-    const x = cloud.x * width + Math.cos(orbit) * width * .105 + Math.sin(clock * .47 + cloud.phase) * 26;
-    const y = cloud.y * height + Math.sin(orbit) * height * .12 + Math.cos(clock * .39 + cloud.phase) * 22;
+    const swell = Math.sin(clock * .28 + cloud.phase);
+    const w = Math.max(320, width * (small.matches ? 1.06 : .72)) * cloud.size * (1 + .15 * swell);
+    const h = height * .70 * cloud.size * (1 - .18 * swell);
+    const x = (cloud.x + Math.cos(orbit) * .13) * width;
+    const y = (cloud.y + Math.sin(orbit) * .21) * height;
     return { x, y, w, h };
   }
   function evolve(dt) {
@@ -142,8 +138,8 @@
       const { x, y, w, h } = geometry(cloud);
       ctx.save();
       ctx.translate(x + cloud.ox, y + cloud.oy);
-      ctx.rotate(clock * cloud.spin * 1.8 + Math.sin(clock * .44 + cloud.phase) * .28);
-      ctx.globalAlpha = cloud.alpha * (.82 + .18 * Math.sin(clock * .55 + cloud.phase));
+      ctx.rotate(Math.sin(clock * .17 + cloud.phase) * .38);
+      ctx.globalAlpha = cloud.alpha * (.89 + .11 * Math.sin(clock * .24 + cloud.phase));
       ctx.drawImage(sprites[cloud.sprite], -w / 2, -h / 2, w, h);
       ctx.restore();
     }
@@ -178,7 +174,9 @@
     toggle.textContent = paused ? 'Activar bruma' : 'Pausar bruma';
     toggle.setAttribute('aria-pressed', String(!paused));
     if (reduced.matches) { ctx.clearRect(0, 0, width, height); return; }
-    if (!sprites) sprites = [[190,108,59],[116,77,162],[164,120,184],[204,139,82]].map((rgb, i) => makeSprite(rgb, i + 4));
+    if (!sprites) {
+      sprites = [[221, 109, 46], [136, 68, 204], [174, 86, 231], [198, 73, 32]].map(makeSprite);
+    }
     paint();
     if (!paused && !document.hidden) raf = requestAnimationFrame(frame);
   }
