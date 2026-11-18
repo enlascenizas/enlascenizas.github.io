@@ -34,14 +34,6 @@ files['site.css'] += `
 @media(max-width:500px){.abyss-release{max-width:100%;font-size:15px;padding:12px 14px;gap:12px}.abyss-release .release-label{font-size:8px;padding-right:12px;letter-spacing:.1em}}
 `;
 
-
-// Shared synthesized audio: each visitor explicitly enables playback.
-for (const [name, content] of Object.entries(files)) {
-  if (!name.endsWith('.html')) continue;
-  const prefix = name.includes('/') ? '../' : '';
-  files[name] = content.replace('</head>', '<link rel="stylesheet" href="' + prefix + 'en-el-abismo/ambient-audio.css?v=1"><script defer src="' + prefix + 'en-el-abismo/ambient-audio.js?v=1" data-soundscape="ashes"></script></head>');
-}
-
 for(const [name,data] of Object.entries(files)){
  const target=path.join(root,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,data,'utf8');
 }
