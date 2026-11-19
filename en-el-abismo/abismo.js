@@ -73,7 +73,9 @@
         pixels.data[i] = rgb[0];
         pixels.data[i + 1] = rgb[1];
         pixels.data[i + 2] = rgb[2];
-        pixels.data[i + 3] = Math.round(226 * density * edge ** 1.5);
+        const outline = clamp((density - .12) / .64, 0, 1);
+        const opacity = outline * outline * (3 - 2 * outline);
+        pixels.data[i + 3] = Math.round(226 * opacity * edge ** 1.1);
       }
     }
     c.putImageData(pixels, 0, 0);
@@ -106,7 +108,7 @@
     return { x, y, w, h };
   }
   function evolve(dt) {
-    clock += dt * .65;
+    clock += dt * 1.1;
     pointer.strength *= Math.exp(-dt * 2.4);
     pointer.vx *= Math.exp(-dt * 3); pointer.vy *= Math.exp(-dt * 3);
     for (const cloud of clouds) {
