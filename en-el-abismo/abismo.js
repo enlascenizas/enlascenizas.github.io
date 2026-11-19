@@ -42,13 +42,10 @@
 
   const canvas = document.querySelector('#abyss-mist');
   const ctx = canvas.getContext('2d', { alpha: true });
-  const toggle = document.querySelector('.mist-toggle');
   if (!ctx) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const small = matchMedia('(max-width: 800px)');
   const fine = matchMedia('(hover: hover) and (pointer: fine)');
-  let paused = false;
-  try { paused = sessionStorage.getItem('abismo-mist-paused') === 'true'; } catch {}
   let width = 0, height = 0, raf = 0, last = 0, clock = 0, sprites, clouds = [];
   const pointer = { x: -9999, y: -9999, vx: 0, vy: 0, time: 0, strength: 0 };
   const wakes = [];
@@ -162,7 +159,7 @@
   }
   function frame(now) {
     raf = 0;
-    if (paused || reduced.matches || document.hidden) return;
+    if (reduced.matches || document.hidden) return;
     if (!last) last = now;
     const dt = now - last;
     if (dt >= 1000 / 30) { evolve(Math.min(dt, 100) / 1000); last = now; paint(); }
@@ -170,19 +167,15 @@
   }
   function sync() {
     cancelAnimationFrame(raf); raf = 0; last = 0;
-    toggle.hidden = reduced.matches;
-    toggle.textContent = paused ? 'Activar bruma' : 'Pausar bruma';
-    toggle.setAttribute('aria-pressed', String(!paused));
     if (reduced.matches) { ctx.clearRect(0, 0, width, height); return; }
     if (!sprites) {
       sprites = [[221, 109, 46], [136, 68, 204], [174, 86, 231], [198, 73, 32]].map(makeSprite);
     }
     paint();
-    if (!paused && !document.hidden) raf = requestAnimationFrame(frame);
+    if (!document.hidden) raf = requestAnimationFrame(frame);
   }
-  toggle.addEventListener('click', () => { paused = !paused; try { sessionStorage.setItem('abismo-mist-paused', String(paused)); } catch {} sync(); });
   window.addEventListener('pointermove', e => {
-    if (paused || reduced.matches || document.hidden || !fine.matches || e.pointerType !== 'mouse') return;
+    if (reduced.matches || document.hidden || !fine.matches || e.pointerType !== 'mouse') return;
     const now = performance.now(), elapsed = now - pointer.time;
     if (!pointer.time || elapsed > 350) { pointer.x = e.clientX; pointer.y = e.clientY; pointer.time = now; return; }
     const dx = e.clientX - pointer.x, dy = e.clientY - pointer.y;
